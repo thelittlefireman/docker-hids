@@ -1,0 +1,58 @@
+version: '3.4'
+
+x-proxy: &proxy
+  http_proxy: ${http_proxy}
+  https_proxy: ${https_proxy}
+  no_proxy: ${no_proxy}
+
+x-base: &base
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "5"
+  # https://docs.docker.com/compose/compose-file/#restart
+  #restart: on-failure # disable restart for development
+
+volumes:
+  json-data:    # suricata json input -> logstash
+  rules-data:   # scirius rules
+  suricata-logs: #suricata logs
+  es-data:      # elasticsearch data
+  pcap-storage: # store pcaps
+
+services:
+  suricata:
+    <<: *base
+    container_name: suricata-hids
+    image: suricata-hids
+    build:
+      context: ./suricata
+      args:
+        <<: *proxy
+    network_mode: "host"
+    cap_add:
+     - NET_ADMIN
+     - SYS_NICE
+     - NET_RAW
+    volumes:
+      - suricata-logs:/var/log/suricata:rw
+      - rules-data:/etc/suricata/rules:rw
+    environment:
+      <<: *proxy
+
+  scirius:
+    <<: *base
+    container_name: scirius-hids
+    image: scirius-hids
+    build:
+      context: ./scirius
+      args:
+        <<: *proxy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config/scirius/local_settings.py:/opt/selks/scirius/scirius/local_settings.py:ro
+      - rules-data:/etc/suricata/rules:rw
+    environment:
+      <<: *proxy

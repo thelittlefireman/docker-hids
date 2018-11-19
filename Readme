@@ -1,0 +1,13 @@
+Feature:
+
+Suricata
+ELK
+https://github.com/StamusNetworks/KTS6 scirius
+geoip ?
+evebox
+https://github.com/StamusNetworks/scirius-docker
+
+maltrail
+
+enable password settings for scirius
+scirius suricata socket
