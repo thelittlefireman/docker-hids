@@ -14,6 +14,9 @@ x-base: &base
   # https://docs.docker.com/compose/compose-file/#restart
   #restart: on-failure # disable restart for development
 
+networks:
+  main:
+
 volumes:
   json-data:    # suricata json input -> logstash
   rules-data:   # scirius rules
@@ -45,6 +48,10 @@ services:
     <<: *base
     container_name: scirius-hids
     image: scirius-hids
+    networks:
+      main:
+        aliases:
+          - hids.scirius
     build:
       context: ./scirius
       args:
