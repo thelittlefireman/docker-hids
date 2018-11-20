@@ -27,8 +27,14 @@ RUN git clone https://github.com/intel/hyperscan \
 RUN cd / && git clone --branch ${suricata_v} https://github.com/OISF/suricata.git \
 && cd suricata \
 && git clone https://github.com/OISF/libhtp.git -b ${libhtp_v} \
+&& cd libhtp \
 && ./autogen.sh \
-&& ./configure --enable-geoip --enable-non-bundled-htp --enable-hiredis --enable-luajit --enable-lua --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+&& ./configure \
+&& make -j "$(grep -c ^processor /proc/cpuinfo)" \
+&& make install \
+&& cd .. \
+&& ./autogen.sh \
+&& ./configure --enable-geoip --enable-hiredis --enable-lua --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
 && make -j "$(grep -c ^processor /proc/cpuinfo)" \
 && make install-full \
 && ldconfig
