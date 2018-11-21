@@ -14,9 +14,6 @@ x-base: &base
   # https://docs.docker.com/compose/compose-file/#restart
   #restart: on-failure # disable restart for development
 
-networks:
-  main:
-
 volumes:
   json-data:    # suricata json input -> logstash
   rules-data:   # scirius rules
@@ -25,6 +22,39 @@ volumes:
   pcap-storage: # store pcaps
 
 services:
+  logstash:
+    <<: *base
+    # cf.: https://www.elastic.co/guide/en/logstash/current/docker-config.html
+    container_name: logstash-hids
+    image: docker.elastic.co/logstash/logstash-oss:6.5.1
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    volumes:
+      - ./logstash/:/usr/share/logstash/pipeline/
+      - json-data:/var/log/suricata:ro
+    hostname: hids.logstash
+    depends_on:
+      - elasticsearch
+    environment:
+      LOG_LEVEL: info
+
+  elasticsearch:
+    <<: *base
+    container_name: elasticsearch-hids
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.1
+    ports: [ '9200:9200', '9300:9300' ]
+    volumes: [ 'es-data:/usr/share/elasticsearch/data' ]
+    hostname: hids.elasticsearch
+    environment:
+      # cf.: https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-configuration-methods
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      network.host: 0.0.0.0
+      node.max_local_storage_nodes: 1
+      cluster.name: hids-cluster
+      bootstrap.memory_lock: 'true'
+      discovery.type: single-node
+
   suricata:
     <<: *base
     container_name: suricata-hids
@@ -48,10 +78,9 @@ services:
     <<: *base
     container_name: scirius-hids
     image: scirius-hids
-    networks:
-      main:
-        aliases:
-          - hids.scirius
+    hostname: hids.scirius
+    depends_on:
+      - suricata
     build:
       context: ./scirius
       args:
