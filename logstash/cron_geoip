@@ -1,0 +1,5 @@
+    # top of crontab
+    MAILTO=your@email.com
+
+    38 9 * * 6 /usr/local/bin/geoipupdate
+    # end of crontab

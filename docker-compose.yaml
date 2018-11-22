@@ -15,7 +15,6 @@ x-base: &base
   #restart: on-failure # disable restart for development
 
 volumes:
-  json-data:    # suricata json input -> logstash
   rules-data:   # scirius rules
   suricata-logs: #suricata logs
   es-data:      # elasticsearch data
@@ -26,13 +25,17 @@ services:
     <<: *base
     # cf.: https://www.elastic.co/guide/en/logstash/current/docker-config.html
     container_name: logstash-hids
-    image: docker.elastic.co/logstash/logstash-oss:6.5.1
+    image: logstash-hids
+    build:
+      context: ./logstash
+      args:
+        <<: *proxy
     ports:
       - "5044:5044"
       - "9600:9600"
     volumes:
       - ./logstash/:/usr/share/logstash/pipeline/
-      - json-data:/var/log/suricata:ro
+      - suricata-logs:/var/log/suricata:ro
     hostname: hids.logstash
     depends_on:
       - elasticsearch
@@ -48,12 +51,33 @@ services:
     hostname: hids.elasticsearch
     environment:
       # cf.: https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-configuration-methods
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       network.host: 0.0.0.0
       node.max_local_storage_nodes: 1
       cluster.name: hids-cluster
       bootstrap.memory_lock: 'true'
       discovery.type: single-node
+  
+  kibana:
+    <<: *base
+    container_name: kibana-hids
+    image: docker.elastic.co/kibana/kibana-oss:6.5.1
+    ports: [ '5601:5601' ]
+    depends_on: [ elasticsearch ]
+    environment:
+      <<: *proxy
+      SERVER_NAME: kibana.docker.selks
+      ELASTICSEARCH_URL: localhost:9200
+
+  evebox:
+    <<: *base
+    image: jasonish/evebox:latest
+    ports:
+      - "5636:5636"
+    depends_on: [ elasticsearch ]
+    environment:
+      <<: *proxy
+      ELASTICSEARCH_URL: localhost:9200
 
   suricata:
     <<: *base
@@ -69,9 +93,11 @@ services:
      - SYS_NICE
      - NET_RAW
     volumes:
+      - ./config/suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
       - suricata-logs:/var/log/suricata:rw
       - rules-data:/etc/suricata/rules:rw
     environment:
+      INTERFACE_NAME: enp0s3
       <<: *proxy
 
   scirius:

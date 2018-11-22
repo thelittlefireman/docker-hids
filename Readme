@@ -14,3 +14,7 @@ scirius suricata socket
 geoipupdate suricata
 mpm-algo: <ac|hs|ac-bs|ac-ks> hs : hyperscan
 max-pending-packets: <number>
+
+check dual databasegeoip logstash
+
+sudo sysctl -w vm.max_map_count=262144

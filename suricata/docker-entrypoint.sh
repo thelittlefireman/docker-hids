@@ -6,4 +6,4 @@ if [ "${1:0:1}" != "-" ]; then
     PS1=${PS1} exec "$@"
 fi
 
-exec /usr/sbin/suricata $@
+exec suricata -c /etc/suricata/suricata.yaml -i $INTERFACE_NAME $@
