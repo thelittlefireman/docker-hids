@@ -67,7 +67,7 @@ services:
     environment:
       <<: *proxy
       SERVER_NAME: kibana.docker.selks
-      ELASTICSEARCH_URL: localhost:9200
+      ELASTICSEARCH_URL: http://localhost:9200
 
   evebox:
     <<: *base
@@ -77,7 +77,7 @@ services:
     depends_on: [ elasticsearch ]
     environment:
       <<: *proxy
-      ELASTICSEARCH_URL: localhost:9200
+      ELASTICSEARCH_URL: http://localhost:9200
 
   suricata:
     <<: *base
