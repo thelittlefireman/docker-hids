@@ -45,6 +45,10 @@ vars:
     FILE_DATA_PORTS: "[$HTTP_PORTS,110,143]"
     FTP_PORTS: 21
 
+unix-command:
+  enabled: yes
+  filename: /var/run/suricata/suricata-command.socket
+
 default-rule-path: /etc/suricata/rules
 rule-files:
  - suricata.rules

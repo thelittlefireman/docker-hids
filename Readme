@@ -11,10 +11,37 @@ maltrail
 
 enable password settings for scirius
 scirius suricata socket
+clean suricata remove repo of git clone
+
+suricata with pf_ring https://www.ntop.org/guides/pf_ring/thirdparty/suricata.html (amd need some ajustement)
+af_packet
+# /usr/bin/suricata default configuration in /etc/suricata/ and will output to /var/log/suricata
+#PF_RING
+RUN cd / \
+&& git clone https://github.com/ntop/PF_RING.git \
+&& cd /PF_RING/kernel \
+&& make -j "$(grep -c ^processor /proc/cpuinfo)" \
+&& make install \
+&& cd /PF_RING/userland/lib \
+&& ./configure \
+&& make -j "$(grep -c ^processor /proc/cpuinfo)" \
+&& make install
+
+--enable-pfring --with-libpfring-includes=/usr/local/include \
+--with-libpfring-libraries=/usr/local/lib \
+
+
 geoipupdate suricata
 mpm-algo: <ac|hs|ac-bs|ac-ks> hs : hyperscan
 max-pending-packets: <number>
+scirius password config ?
+suricata ports config ?
+set "$(grep -c ^processor /proc/cpuinfo)" to parameters
 
 check dual databasegeoip logstash
 
 sudo sysctl -w vm.max_map_count=262144
+
+new rules http://www.covert.io/threat-intelligence/
+
+https://github.com/ndenev/suricata-netflow-top

@@ -1,5 +1,12 @@
 version: '3.4'
 
+networks:
+  hids_networks:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/16
+
 x-proxy: &proxy
   http_proxy: ${http_proxy}
   https_proxy: ${https_proxy}
@@ -17,6 +24,7 @@ x-base: &base
 volumes:
   rules-data:   # scirius rules
   suricata-logs: #suricata logs
+  suricata-socket:
   es-data:      # elasticsearch data
   pcap-storage: # store pcaps
 
@@ -26,6 +34,8 @@ services:
     # cf.: https://www.elastic.co/guide/en/logstash/current/docker-config.html
     container_name: logstash-hids
     image: logstash-hids
+    networks: 
+      - hids_networks
     build:
       context: ./logstash
       args:
@@ -36,10 +46,10 @@ services:
     volumes:
       - ./logstash/:/usr/share/logstash/pipeline/
       - suricata-logs:/var/log/suricata:ro
-    hostname: hids.logstash
     depends_on:
       - elasticsearch
     environment:
+      <<: *proxy
       LOG_LEVEL: info
 
   elasticsearch:
@@ -48,7 +58,8 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.1
     ports: [ '9200:9200', '9300:9300' ]
     volumes: [ 'es-data:/usr/share/elasticsearch/data' ]
-    hostname: hids.elasticsearch
+    networks: 
+      - hids_networks
     environment:
       # cf.: https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-configuration-methods
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
@@ -62,22 +73,26 @@ services:
     <<: *base
     container_name: kibana-hids
     image: docker.elastic.co/kibana/kibana-oss:6.5.1
+    networks: 
+      - hids_networks
     ports: [ '5601:5601' ]
     depends_on: [ elasticsearch ]
     environment:
       <<: *proxy
-      SERVER_NAME: kibana.docker.selks
-      ELASTICSEARCH_URL: http://localhost:9200
+      SERVER_NAME: kibana
+      ELASTICSEARCH_URL: http://elasticsearch:9200
 
   evebox:
     <<: *base
     image: jasonish/evebox:latest
+    networks: 
+      - hids_networks
     ports:
       - "5636:5636"
     depends_on: [ elasticsearch ]
     environment:
       <<: *proxy
-      ELASTICSEARCH_URL: http://localhost:9200
+      ELASTICSEARCH_URL: http://elasticsearch:9200
 
   suricata:
     <<: *base
@@ -96,15 +111,17 @@ services:
       - ./config/suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
       - suricata-logs:/var/log/suricata:rw
       - rules-data:/etc/suricata/rules:rw
+      - suricata-socket:/var/run/suricata/suricata-command.socket:rw
     environment:
-      INTERFACE_NAME: enp0s3
       <<: *proxy
+      INTERFACE_NAME: enp0s3
 
   scirius:
     <<: *base
     container_name: scirius-hids
     image: scirius-hids
-    hostname: hids.scirius
+    networks: 
+      - hids_networks
     depends_on:
       - suricata
     build:
@@ -116,5 +133,6 @@ services:
     volumes:
       - ./config/scirius/local_settings.py:/opt/selks/scirius/scirius/local_settings.py:ro
       - rules-data:/etc/suricata/rules:rw
+      - suricata-socket:/var/run/suricata/suricata-command.socket:rw
     environment:
       <<: *proxy

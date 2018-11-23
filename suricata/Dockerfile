@@ -22,7 +22,7 @@ RUN git clone https://github.com/intel/hyperscan \
 && ldconfig
 
 # SURICATA
-# /usr/bin/suricata default configuration in /etc/suricata/ and will output to /var/log/suricata
+
 
 RUN cd / && git clone --branch ${suricata_v} https://github.com/OISF/suricata.git \
 && cd suricata \
@@ -40,6 +40,9 @@ RUN cd / && git clone --branch ${suricata_v} https://github.com/OISF/suricata.gi
 && ldconfig
 
 RUN apt-get remove -y ${COMPILE_PKG} && apt-get autoremove -y
+
+#add tcmalloc improvement: https://suricata.readthedocs.io/en/suricata-4.0.5/performance/tcmalloc.html
+RUN apt-get install -y libtcmalloc-minimal0
 
 # Open up the permissions on /var/log/suricata so linked containers can
 # see it.
