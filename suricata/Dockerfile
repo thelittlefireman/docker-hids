@@ -42,7 +42,7 @@ RUN cd / && git clone --branch ${suricata_v} https://github.com/OISF/suricata.gi
 RUN apt-get remove -y ${COMPILE_PKG} && apt-get autoremove -y
 
 #add tcmalloc improvement: https://suricata.readthedocs.io/en/suricata-4.0.5/performance/tcmalloc.html
-RUN apt-get install -y libtcmalloc-minimal0
+RUN apt-get install -y libtcmalloc-minimal4
 
 # Open up the permissions on /var/log/suricata so linked containers can
 # see it.

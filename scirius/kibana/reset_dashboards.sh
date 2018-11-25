@@ -6,7 +6,7 @@ KIBANA_LOADED="/sciriusdata/kibana_dashboards"
 
 reset_dashboards() {
 	for I in $(seq 0 20); do
-		python manage.py kibana_reset 2>/dev/null && return 0
+		python manage.py kibana_reset && return 0
 		echo "Kibana dashboards reset: Elasticsearch not ready, retrying in 10 seconds."
 		sleep 10
 	done

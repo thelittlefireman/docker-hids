@@ -11,7 +11,7 @@ create_db() {
 	python manage.py loaddata /tmp/scirius.json
 	python manage.py createcachetable my_cache_table
 	python manage.py addsource "ETOpen Ruleset" https://rules.emergingthreats.net/open/suricata-4.0/emerging.rules.tar.gz http sigs
-	python manage.py addsource "SSLBL abuse.ch" https://sslbl.abuse.ch/blacklist/sslblacklist.rules http sig
+	#python manage.py addsource "SSLBL abuse.ch" https://sslbl.abuse.ch/blacklist/sslblacklist.rules http sig
 	python manage.py addsource "PT Research Ruleset" https://raw.githubusercontent.com/ptresearch/AttackDetection/master/pt.rules.tar.gz http sigs
 	python manage.py defaultruleset "Default SELKS ruleset"
 	python manage.py disablecategory "Default SELKS ruleset" stream-events

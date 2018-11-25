@@ -111,10 +111,10 @@ services:
       - ./config/suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
       - suricata-logs:/var/log/suricata:rw
       - rules-data:/etc/suricata/rules:rw
-      - suricata-socket:/var/run/suricata/suricata-command.socket:rw
+      - suricata-socket:/var/run/suricata:rw
     environment:
       <<: *proxy
-      INTERFACE_NAME: enp0s3
+      INTERFACE_NAME: ens33
 
   scirius:
     <<: *base
@@ -133,6 +133,6 @@ services:
     volumes:
       - ./config/scirius/local_settings.py:/opt/selks/scirius/scirius/local_settings.py:ro
       - rules-data:/etc/suricata/rules:rw
-      - suricata-socket:/var/run/suricata/suricata-command.socket:rw
+      - suricata-socket:/var/run/suricata:rw
     environment:
       <<: *proxy

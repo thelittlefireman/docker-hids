@@ -30,7 +30,7 @@ RUN cd / \
 --enable-pfring --with-libpfring-includes=/usr/local/include \
 --with-libpfring-libraries=/usr/local/lib \
 
-
+suricata remove unused pkg
 geoipupdate suricata
 mpm-algo: <ac|hs|ac-bs|ac-ks> hs : hyperscan
 max-pending-packets: <number>

@@ -1,6 +1,6 @@
 USE_ELASTICSEARCH = True
 ELASTICSEARCH_ADDRESS = "elasticsearch:9200"
-ELASTICSEARCH_VERSION = 6 # In 1, 2, 5 set depending on ES major version
+ELASTICSEARCH_VERSION = 6
 
 USE_KIBANA = True
 KIBANA_URL = "http://kibana:5601/"

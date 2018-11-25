@@ -47,8 +47,8 @@ vars:
 
 unix-command:
   enabled: yes
-  filename: /var/run/suricata/suricata-command.socket
+  filename: "/var/run/suricata/suricata-command.socket"
 
-default-rule-path: /etc/suricata/rules
+default-rule-path: "/etc/suricata/rules"
 rule-files:
  - suricata.rules
